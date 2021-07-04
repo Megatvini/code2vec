@@ -107,7 +107,7 @@ def parse_args():
 
 def find_all_sub_ll_files(path):
     if path.is_file():
-        if path.suffix == '.llvm_ir_parser':
+        if path.suffix == '.ll':
             yield path.absolute()
     else:
         for child in path.iterdir():
@@ -154,7 +154,7 @@ def get_raw_text(file_content, node):
 
 
 def get_ast(ll_file_path):
-    cmd = ['go', 'run', 'main/main.go', '-llvm_ir_parser-file-path', str(ll_file_path)]
+    cmd = ['go', 'run', 'main/main.go', '-ll-file-path', str(ll_file_path)]
     ast_text = subprocess.check_output(cmd, cwd=str(pathlib.Path(__file__).parent / 'llvm_ir_parser'))
     root = parse_ast_text(ast_text)
     file_content = read_file(ll_file_path)
@@ -170,7 +170,7 @@ def get_block_labels(ll_file_path):
         '-disable-output',
         str(ll_file_path)
     ]
-    cwd = str(str(pathlib.Path(__file__).parent.absolute()))
+    cwd = str(pathlib.Path(__file__).parent.absolute())
     labels = subprocess.check_output(cmd, cwd=cwd, stderr=subprocess.STDOUT)
 
     res = []
@@ -180,26 +180,6 @@ def get_block_labels(ll_file_path):
         *_, label = line.split('\t')
         res.append(label)
     return res
-
-# def get_blocks_dict(labels):
-#     res = {}
-#     for line in labels.decode().splitlines(keepends=False):
-#         if line.strip() == '':
-#             continue
-#         function, block, label = line.split('\t')
-#         res[f'{function}_{block}'] = label
-#     return res
-
-
-# def get_block_function_name(basic_block_node):
-#     func_def_node = basic_block_node.parent.parent
-#     func_header = func_def_node.children[0]
-#     assert func_header.node_type == 'FuncHeader'
-#     return func_header.children[1].txt.strip('@')
-#
-#
-# def get_block_ir_label(ast, bb_node):
-#     return ''
 
 
 def get_basic_blocks(ast, block_labels):
