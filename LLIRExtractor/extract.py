@@ -2,6 +2,9 @@ import argparse
 import itertools
 import pathlib
 import subprocess
+import traceback
+import warnings
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
 from typing import List
 
@@ -191,11 +194,14 @@ def get_basic_blocks(ast, block_labels):
 
 
 def hash_code(text):
-    # default java string hash code implementation
-    h = np.int64(0)
-    for b in text.encode():
-        h = 31 * h + (b & 255)
-    return h
+    # overflow is normal here
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', r'overflow encountered')
+        # default java string hash code implementation
+        h = np.int32(0)
+        for b in text.encode():
+            h = 31 * h + (b & 255)
+        return h
 
 
 def path_node_2_str(node):
@@ -220,6 +226,13 @@ def print_training_data(basic_block, paths):
     print(label, ' '.join(path_strings))
 
 
+def try_extract_from_ll_file(ll_file_path, max_path_length, max_path_width):
+    try:
+        extract_from_ll_file(ll_file_path, max_path_length, max_path_width)
+    except Exception as e:
+        traceback.print_exc()
+
+
 def extract_from_ll_file(ll_file_path, max_path_length, max_path_width):
     ast = get_ast(ll_file_path)
     block_labels = get_block_labels(ll_file_path)
@@ -236,8 +249,9 @@ def read_file(ll_file_path):
 
 
 def extract_from_all_files(all_ll_files, max_path_length, max_path_width):
-    for ll_file_path in all_ll_files:
-        extract_from_ll_file(ll_file_path, max_path_length, max_path_width)
+    with ProcessPoolExecutor() as pool:
+        for ll_file_path in list(all_ll_files):
+            pool.submit(try_extract_from_ll_file, ll_file_path, max_path_length, max_path_width)
 
 
 def main():
