@@ -88,8 +88,6 @@ if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument("-trd", "--train_data", dest="train_data_path",
                         help="path to training data file", required=True)
-    parser.add_argument("-ted", "--test_data", dest="test_data_path",
-                        help="path to test data file", required=True)
     parser.add_argument("-vd", "--val_data", dest="val_data_path",
                         help="path to validation data file", required=True)
     parser.add_argument("-mc", "--max_contexts", dest="max_contexts", default=200,
@@ -112,7 +110,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     train_data_path = args.train_data_path
-    test_data_path = args.test_data_path
     val_data_path = args.val_data_path
     word_histogram_path = args.word_histogram
     path_histogram_path = args.path_histogram
@@ -129,7 +126,7 @@ if __name__ == '__main__':
                                                                        return_counts=True)
 
     num_training_examples = 0
-    for data_file_path, data_role in zip([test_data_path, val_data_path, train_data_path], ['test', 'val', 'train']):
+    for data_file_path, data_role in zip([val_data_path, train_data_path], ['val', 'train']):
         num_examples = process_file(file_path=data_file_path, data_file_role=data_role, dataset_name=args.output_name,
                                     word_to_count=word_to_count, path_to_count=path_to_count,
                                     max_contexts=int(args.max_contexts))
