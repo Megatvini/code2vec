@@ -44,3 +44,7 @@ ${PYTHON} preprocess.py --train_data ${TRAIN_DATA_FILE} --val_data ${VAL_DATA_FI
   --target_vocab_size ${TARGET_VOCAB_SIZE} --word_histogram ${ORIGIN_HISTOGRAM_FILE} \
   --path_histogram ${PATH_HISTOGRAM_FILE} --target_histogram ${TARGET_HISTOGRAM_FILE} \
   --output_name ${DATASET_PATH}/${DATASET_NAME}
+
+# If all went well, the raw data files can be deleted, because preprocess.py creates new files
+# with truncated and padded number of paths for each example.
+rm ${TRAIN_DATA_FILE} ${VAL_DATA_FILE} ${TARGET_HISTOGRAM_FILE} ${ORIGIN_HISTOGRAM_FILE} ${PATH_HISTOGRAM_FILE}
