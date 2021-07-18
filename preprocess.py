@@ -30,7 +30,7 @@ def process_file(file_path, data_file_role, dataset_name, word_to_count, path_to
     with open(output_path, 'w') as outfile:
         with open(file_path, 'r') as file:
             for line in file:
-                parts = line.rstrip('\n').split(' ')
+                parts = line.replace('%"reg2mem alloca point"', '%r2map').rstrip('\n').split(' ')
                 target_name = parts[0]
                 contexts = parts[1:]
 
