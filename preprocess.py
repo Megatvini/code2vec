@@ -1,4 +1,5 @@
 import random
+import re
 from argparse import ArgumentParser
 import common
 import pickle
@@ -27,12 +28,19 @@ def process_file(file_path, data_file_role, dataset_name, word_to_count, path_to
     empty = 0
     max_unfiltered = 0
     output_path = '{}.{}.c2v'.format(dataset_name, data_file_role)
+    # reg2mem pass artifact
+    reg2mem_regex = re.compile(r'%"reg2mem alloca point\d*"')
     with open(output_path, 'w') as outfile:
         with open(file_path, 'r') as file:
             for line in file:
-                parts = line.replace('%"reg2mem alloca point"', '%r2map').rstrip('\n').split(' ')
+                parts = reg2mem_regex.sub('%r2map', line).rstrip('\n').split(' ')
                 target_name = parts[0]
                 contexts = parts[1:]
+
+                for c in contexts:
+                    triplet = c.split(',')
+                    if len(triplet) != 3:
+                        raise RuntimeError(f'Encountered Invalid Triplet: {triplet}')
 
                 if len(contexts) > max_unfiltered:
                     max_unfiltered = len(contexts)
